@@ -1,48 +1,14 @@
-name: Deploy to GitHub Pages
+# After (Fixed)
+- name: Checkout Code
+  uses: actions/checkout@v6  # Upgraded version
 
-on:
-  push:
-    branches:
-      - master
+- name: Build Vite Vue App
+  run: |
+    npm install
+    npm run build
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+- name: Upload Build Artifacts
+  uses: actions/upload-artifact@v7  # Upgraded version
+  with:
+    name: vite-dist
+    path: dist/
