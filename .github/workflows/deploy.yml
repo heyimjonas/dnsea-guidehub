@@ -1,14 +1,40 @@
-# After (Fixed)
-- name: Checkout Code
-  uses: actions/checkout@v6  # Upgraded version
+name: Deploy Vue App
 
-- name: Build Vite Vue App
-  run: |
-    npm install
-    npm run build
+on:
+  push:
+    branches:
+      - main
 
-- name: Upload Build Artifacts
-  uses: actions/upload-artifact@v7  # Upgraded version
-  with:
-    name: vite-dist
-    path: dist/
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/deploy-pages@v4
