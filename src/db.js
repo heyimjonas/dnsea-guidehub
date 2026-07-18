@@ -46,7 +46,7 @@ export async function getClassBySlug(slug) {
 export async function getFirstSpecs(classId) {
   const db = await initDb()
   const r = await db.exec(
-    'SELECT id, name, description, specialization_logo AS logo FROM first_specializations WHERE class_id = ? ORDER BY id',
+    'SELECT id, name, description, specialization_logo AS logo, specialization_type AS specType FROM first_specializations WHERE class_id = ? ORDER BY id',
     [classId]
   )
   return rows(r)

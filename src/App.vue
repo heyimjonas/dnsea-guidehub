@@ -64,7 +64,8 @@ async function onSelect(slug) {
 <style scoped>
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .content-area {
   flex: 1;

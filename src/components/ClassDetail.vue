@@ -1,7 +1,12 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   cls: { type: Object, default: null },
 })
+
+const normalSpecs = computed(() => props.cls?.firstSpecs?.filter(fs => fs.specType !== 'SPINOFF') ?? [])
+const spinoffSpecs = computed(() => props.cls?.firstSpecs?.filter(fs => fs.specType === 'SPINOFF') ?? [])
 
 function diffStars(n) {
   return n ? '★'.repeat(n) + '☆'.repeat(5 - n) : ''
@@ -16,7 +21,8 @@ function diffStars(n) {
       backgroundImage: `url(${cls.classImage})`,
     }"
   >
-    <div class="content">
+    <div class="scroll-area">
+      <div class="content">
       <h1 class="title">{{ cls.name }}</h1>
 
       <div class="meta" v-if="cls.difficulty">
@@ -34,25 +40,50 @@ function diffStars(n) {
         <p class="desc">{{ cls.description }}</p>
       </div>
 
-      <div v-if="cls.firstSpecs?.length">
+      <div v-if="normalSpecs.length" class="spec-section">
         <h2 class="specs-title">Specializations</h2>
-        <div class="tree">
+        <div class="spec-grid">
           <div
-            v-for="(fs, i) in cls.firstSpecs"
+            v-for="(fs) in normalSpecs"
             :key="fs.id"
-            class="tree-row"
+            class="spec-card"
           >
-            <img v-if="fs.logo" :src="fs.logo" :alt="fs.name" class="spec-logo" />
-            <div class="tree-label">{{ fs.name }}</div>
-            <div class="tree-leaves" v-if="fs.secondSpecs?.length">
-              <span v-for="ss in fs.secondSpecs" :key="ss.id" class="tree-leaf">
-                <img v-if="ss.logo" :src="ss.logo" :alt="ss.name" class="leaf-logo" />
-                {{ ss.name }}
-              </span>
+            <div class="spec-card-head">
+              <img v-if="fs.logo" :src="fs.logo" :alt="fs.name" class="spec-logo" />
+              <div class="spec-card-name">{{ fs.name }}</div>
+            </div>
+            <div class="spec-chips" v-if="fs.secondSpecs?.length">
+              <div v-for="ss in fs.secondSpecs" :key="ss.id" class="spec-box">
+                <img v-if="ss.logo" :src="ss.logo" :alt="ss.name" class="box-logo" />
+                <span class="box-name">{{ ss.name }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div v-if="spinoffSpecs.length" class="spec-section">
+        <h2 class="specs-title">Spinoff</h2>
+        <div class="spec-grid">
+          <div
+            v-for="(fs) in spinoffSpecs"
+            :key="fs.id"
+            class="spec-card"
+          >
+            <div class="spec-card-head">
+              <img v-if="fs.logo" :src="fs.logo" :alt="fs.name" class="spec-logo" />
+              <div class="spec-card-name">{{ fs.name }}</div>
+            </div>
+            <div class="spec-chips" v-if="fs.secondSpecs?.length">
+              <div v-for="ss in fs.secondSpecs" :key="ss.id" class="spec-box">
+                <img v-if="ss.logo" :src="ss.logo" :alt="ss.name" class="box-logo" />
+                <span class="box-name">{{ ss.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
   </main>
 
@@ -64,12 +95,18 @@ function diffStars(n) {
 <style scoped>
 .detail {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   background-size: cover;
   background-position: 5% top;
   background-repeat: no-repeat;
   background-color: #0a0a0a;
   position: relative;
+}
+.scroll-area {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
 .detail.empty {
   display: flex;
@@ -87,8 +124,6 @@ function diffStars(n) {
   flex-direction: column;
   gap: 16px;
   max-width: 580px;
-  position: relative;
-  z-index: 1;
 }
 
 .detail::before {
@@ -117,8 +152,8 @@ function diffStars(n) {
 }
 .stars {
   color: #f5a623;
-  font-size: 1.1rem;
-  letter-spacing: 2px;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
   text-shadow: 0 1px 8px rgba(0,0,0,.8);
 }
 .text-box {
@@ -139,6 +174,9 @@ function diffStars(n) {
 .desc {
   white-space: pre-line;
 }
+.spec-section {
+  width: min(calc(100% + 200px), calc(100vw - 72px));
+}
 .specs-title {
   font-size: 1.1rem;
   color: #fff;
@@ -157,71 +195,87 @@ function diffStars(n) {
   margin: 0 0 8px !important;
 }
 
-/* --- tree --- */
-.tree {
-  position: relative;
-  padding-left: 28px;
-}
-.tree::before {
-  content: '';
-  position: absolute;
-  left: 12px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(255,255,255,.18);
-}
-.tree-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  position: relative;
-}
-.tree-row::before {
-  content: '';
-  position: absolute;
-  left: -16px;
-  top: 50%;
-  width: 16px;
-  height: 1px;
-  background: rgba(255,255,255,.18);
-}
-.spec-logo {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  border-radius: 5px;
-  flex-shrink: 0;
-}
-.tree-label {
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 500;
-  min-width: 110px;
-  text-shadow: 0 1px 6px rgba(0,0,0,.6);
-}
-.tree-leaves {
+/* --- spec grid --- */
+.spec-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.tree-leaf {
-  background: rgba(255,255,255,.08);
-  color: #b0b5cc;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: .88rem;
-  white-space: nowrap;
-  display: inline-flex;
+.spec-card {
+  flex: 0 0 auto;
+  min-width: 100px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: 14px 10px;
+  transition: background .15s;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
 }
-.leaf-logo {
-  width: 22px;
-  height: 22px;
+.spec-card-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.spec-logo {
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  border-radius: 3px;
+  border-radius: 8px;
   flex-shrink: 0;
+}
+.spec-card-name {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.spec-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  justify-content: center;
+  width: 100%;
+}
+.spec-box {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  transition: background .12s;
+}
+.spec-box:hover {
+  background: rgba(255,255,255,.1);
+}
+.box-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.box-name {
+  color: #c8ccd6;
+  font-size: .85rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 </style>

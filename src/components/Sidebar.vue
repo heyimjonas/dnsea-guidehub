@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 const props = defineProps({
   classes: { type: Array, default: () => [] },
@@ -16,13 +16,19 @@ const filtered = computed(() => {
   return props.classes.filter(c => c.name.toLowerCase().includes(q))
 })
 
+const catOpen = reactive({ 'Class Introduction': true })
+
 const categories = computed(() => [
   {
     name: 'Class Introduction',
-    open: true,
+    open: catOpen['Class Introduction'],
     items: filtered.value,
   },
 ])
+
+function toggleCategory(cat) {
+  catOpen[cat.name] = !catOpen[cat.name]
+}
 </script>
 
 <template>
@@ -45,11 +51,13 @@ const categories = computed(() => [
         :key="cat.name"
         class="category"
       >
-        <div class="cat-header">
+        <div class="cat-header" @click="toggleCategory(cat)">
           <span class="cat-name">{{ cat.name }}</span>
+          <span class="cat-arrow">{{ cat.open ? '▾' : '▸' }}</span>
           <span class="cat-count">{{ cat.items.length }}</span>
         </div>
-        <div v-show="cat.open" class="cat-items">
+        <Transition name="collapse">
+          <div v-show="cat.open" class="cat-items">
           <button
             v-for="c in cat.items"
             :key="c.id"
@@ -61,6 +69,7 @@ const categories = computed(() => [
           </button>
           <p v-if="!cat.items.length" class="no-results">No classes match.</p>
         </div>
+        </Transition>
       </div>
     </nav>
   </aside>
@@ -130,7 +139,13 @@ const categories = computed(() => [
   align-items: center;
   justify-content: space-between;
   padding: 8px 10px 6px;
-  cursor: default;
+  cursor: pointer;
+  user-select: none;
+}
+.cat-arrow {
+  font-size: 1rem;
+  color: #4b5563;
+  transition: transform .15s;
 }
 .cat-name {
   font-size: 0.72rem;
@@ -190,5 +205,21 @@ const categories = computed(() => [
   color: #4b5563;
   font-size: 0.8rem;
   text-align: center;
+}
+
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: max-height .25s ease, opacity .2s ease;
+  overflow: hidden;
+}
+.collapse-enter-from,
+.collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.collapse-enter-to,
+.collapse-leave-from {
+  max-height: 800px;
+  opacity: 1;
 }
 </style>
