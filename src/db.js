@@ -20,13 +20,8 @@ export async function initDb() {
 
   worker = await createDbWorker(
     [{
-      from: 'inline',
-      config: {
-        serverMode: 'full',
-        requestChunkSize: 4096,
-        url: `${import.meta.env.BASE_URL}database/dnsea_guidehub.db`,
-        fileLength: 53248,
-      },
+      from: 'jsonconfig',
+      configUrl: `${import.meta.env.BASE_URL}database/config.json`,
     }],
     workerUrl.toString(),
     wasmUrl.toString(),
