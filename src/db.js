@@ -25,6 +25,7 @@ export async function initDb() {
         serverMode: 'full',
         requestChunkSize: 4096,
         url: `${import.meta.env.BASE_URL}database/dnsea_guidehub.db`,
+        fileLength: 53248,
       },
     }],
     workerUrl.toString(),
