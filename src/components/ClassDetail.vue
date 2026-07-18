@@ -188,40 +188,40 @@ function diffStars(n) {
   background: rgba(255,255,255,.18);
 }
 .spec-logo {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 5px;
   flex-shrink: 0;
 }
 .tree-label {
   color: #fff;
-  font-size: .95rem;
+  font-size: 1rem;
   font-weight: 500;
-  min-width: 96px;
+  min-width: 110px;
   text-shadow: 0 1px 6px rgba(0,0,0,.6);
 }
 .tree-leaves {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 .tree-leaf {
   background: rgba(255,255,255,.08);
   color: #b0b5cc;
-  padding: 3px 10px;
-  border-radius: 10px;
-  font-size: .8rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: .88rem;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 .leaf-logo {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
-  border-radius: 2px;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 </style>
