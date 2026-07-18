@@ -15,12 +15,21 @@ const filtered = computed(() => {
   const q = search.value.toLowerCase()
   return props.classes.filter(c => c.name.toLowerCase().includes(q))
 })
+
+const categories = computed(() => [
+  {
+    name: 'Class Introduction',
+    open: true,
+    items: filtered.value,
+  },
+])
 </script>
 
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h2>Classes</h2>
+      <span class="logo">DNSEA</span>
+      <span class="subtitle">Guide Hub</span>
     </div>
     <div class="search-wrap">
       <input
@@ -30,16 +39,29 @@ const filtered = computed(() => {
         class="search-input"
       />
     </div>
-    <nav class="class-list">
-      <button
-        v-for="c in filtered"
-        :key="c.id"
-        :class="['class-item', { active: c.slug === activeSlug }]"
-        @click="emit('select', c.slug)"
+    <nav class="nav-list">
+      <div
+        v-for="cat in categories"
+        :key="cat.name"
+        class="category"
       >
-        {{ c.name }}
-      </button>
-      <p v-if="!filtered.length" class="no-results">No classes match.</p>
+        <div class="cat-header">
+          <span class="cat-name">{{ cat.name }}</span>
+          <span class="cat-count">{{ cat.items.length }}</span>
+        </div>
+        <div v-show="cat.open" class="cat-items">
+          <button
+            v-for="c in cat.items"
+            :key="c.id"
+            :class="['class-item', { active: c.slug === activeSlug }]"
+            @click="emit('select', c.slug)"
+          >
+            <span class="class-dot"></span>
+            {{ c.name }}
+          </button>
+          <p v-if="!cat.items.length" class="no-results">No classes match.</p>
+        </div>
+      </div>
     </nav>
   </aside>
 </template>
@@ -48,66 +70,125 @@ const filtered = computed(() => {
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: #f5f5f5;
-  border-right: 1px solid #ddd;
+  background: #0f1218;
+  border-right: 1px solid #1e2229;
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 .sidebar-header {
-  padding: 16px 16px 8px;
+  padding: 20px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
-.sidebar-header h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e8eaf0;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.subtitle {
+  font-size: 0.75rem;
+  color: #6b7280;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 .search-wrap {
-  padding: 0 16px 12px;
+  padding: 12px 12px 8px;
 }
 .search-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+  padding: 7px 10px;
+  border: 1px solid #262b33;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  background: #181c23;
+  color: #c8ccd4;
   box-sizing: border-box;
   outline: none;
+  transition: border-color 0.15s;
+}
+.search-input::placeholder {
+  color: #4b5563;
 }
 .search-input:focus {
-  border-color: #4a90d9;
+  border-color: #4a6fa5;
 }
-.class-list {
+.nav-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px 16px;
+  padding: 0 8px 12px;
+}
+.category {
+  margin-bottom: 4px;
+}
+.cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 6px;
+  cursor: default;
+}
+.cat-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.cat-count {
+  font-size: 0.7rem;
+  color: #4b5563;
+  background: #181c23;
+  border-radius: 8px;
+  padding: 0 6px;
+  line-height: 1.4;
+}
+.cat-items {
+  display: flex;
+  flex-direction: column;
 }
 .class-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
-  padding: 10px 12px;
+  padding: 7px 10px;
   border: none;
   background: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
-  color: #444;
-  transition: background 0.15s;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  transition: background 0.12s, color 0.12s;
 }
 .class-item:hover {
-  background: #e0e0e0;
+  background: #191d26;
+  color: #e0e3e8;
 }
 .class-item.active {
-  background: #4a90d9;
-  color: #fff;
-  font-weight: 600;
+  background: #1e2a44;
+  color: #a8c7fa;
+  font-weight: 500;
+}
+.class-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b4252;
+  flex-shrink: 0;
+}
+.class-item.active .class-dot {
+  background: #5b8dee;
 }
 .no-results {
-  padding: 12px;
-  color: #999;
-  font-size: 0.85rem;
+  padding: 10px 10px;
+  color: #4b5563;
+  font-size: 0.8rem;
   text-align: center;
 }
 </style>
