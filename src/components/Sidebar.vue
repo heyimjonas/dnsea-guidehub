@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 const props = defineProps({
   classes: { type: Array, default: () => [] },
@@ -12,6 +12,23 @@ const search = ref('')
 
 const catOpen = reactive({ 'News': true, 'Class Introduction': true })
 
+const patchnoteTitle = ref('[2026] July Patchnote')
+
+onMounted(async () => {
+  try {
+    // fetch via CORS proxy — patchnote site blocks direct requests
+    const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://patchnote.dragonnest.com/sea/'))
+    const html = await res.text()
+    const m = html.match(/<title>([^<]+)<\/title>/)
+    if (m) {
+      patchnoteTitle.value = m[1].replace(/ \|?.*$/, '').trim()
+    }
+  } catch {
+    // keep fallback
+  }
+})
+
+
 const categories = computed(() => {
   const q = search.value.toLowerCase().trim()
 
@@ -19,8 +36,8 @@ const categories = computed(() => {
     {
       name: 'News',
       items: [
-        { id: 'notice', name: 'Notice', url: 'https://sea.dragonnest.com/news/notice' },
-        { id: 'patchnotes', name: 'Patch Notes', url: 'https://patchnote.dragonnest.com/sea/' },
+        { id: 'notice', name: 'NOTICE', url: 'https://sea.dragonnest.com/news/notice' },
+        { id: 'patchnotes', name: patchnoteTitle.value, url: 'https://patchnote.dragonnest.com/sea/' },
       ],
     },
     {
@@ -88,7 +105,7 @@ function toggleCategory(cat) {
             </button>
             <button
               v-else
-              class="class-item"
+              class="class-item news-item"
               @click="emit('selectExternal', c.url)"
             >
               <span class="class-dot"></span>
@@ -210,6 +227,10 @@ function toggleCategory(cat) {
   transition: background 0.12s, color 0.12s;
   text-decoration: none;
   box-sizing: border-box;
+}
+.news-item {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .class-item:hover {
   background: #191d26;
