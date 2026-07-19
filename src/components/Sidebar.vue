@@ -41,7 +41,7 @@ function toggleCategory(cat) {
       <input
         v-model="search"
         type="text"
-        placeholder="Search classes..."
+        placeholder="Search categories..."
         class="search-input"
       />
     </div>
