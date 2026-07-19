@@ -6,7 +6,7 @@ const props = defineProps({
   activeSlug: { type: String, default: null },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'selectExternal'])
 
 const search = ref('')
 
@@ -16,9 +16,17 @@ const filtered = computed(() => {
   return props.classes.filter(c => c.name.toLowerCase().includes(q))
 })
 
-const catOpen = reactive({ 'Class Introduction': true })
+const catOpen = reactive({ 'News': true, 'Class Introduction': true })
 
 const categories = computed(() => [
+  {
+    name: 'News',
+    open: catOpen['News'],
+    items: [
+      { id: 'notice', name: 'Notice', url: 'https://sea.dragonnest.com/news/notice' },
+      { id: 'patchnotes', name: 'Patch Notes', url: 'https://patchnote.dragonnest.com/sea/' },
+    ],
+  },
   {
     name: 'Class Introduction',
     open: catOpen['Class Introduction'],
@@ -58,15 +66,24 @@ function toggleCategory(cat) {
         </div>
         <Transition name="collapse">
           <div v-show="cat.open" class="cat-items">
-          <button
-            v-for="c in cat.items"
-            :key="c.id"
-            :class="['class-item', { active: c.slug === activeSlug }]"
-            @click="emit('select', c.slug)"
-          >
-            <span class="class-dot"></span>
-            {{ c.name }}
-          </button>
+          <template v-for="c in cat.items" :key="c.id">
+            <button
+              v-if="!c.url"
+              :class="['class-item', { active: c.slug === activeSlug }]"
+              @click="emit('select', c.slug)"
+            >
+              <span class="class-dot"></span>
+              {{ c.name }}
+            </button>
+            <button
+              v-else
+              class="class-item"
+              @click="emit('selectExternal', c.url)"
+            >
+              <span class="class-dot"></span>
+              {{ c.name }}
+            </button>
+          </template>
           <p v-if="!cat.items.length" class="no-results">No classes match.</p>
         </div>
         </Transition>
@@ -180,6 +197,8 @@ function toggleCategory(cat) {
   font-size: 0.85rem;
   color: #9ca3af;
   transition: background 0.12s, color 0.12s;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 .class-item:hover {
   background: #191d26;

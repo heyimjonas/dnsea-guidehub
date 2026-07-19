@@ -6,6 +6,7 @@ import { getClasses, getClassWithSpecs } from './db.js'
 
 const classes = ref([])
 const activeClass = ref(null)
+const externalUrl = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const imgLoaded = ref(false)
@@ -34,6 +35,7 @@ function preloadImages() {
 }
 
 async function onSelect(slug) {
+  externalUrl.value = null
   loading.value = true
   imgLoaded.value = false
   try {
@@ -44,6 +46,11 @@ async function onSelect(slug) {
     loading.value = false
   }
 }
+
+function onSelectExternal(url) {
+  activeClass.value = null
+  externalUrl.value = url
+}
 </script>
 
 <template>
@@ -52,11 +59,13 @@ async function onSelect(slug) {
       :classes="classes"
       :active-slug="activeClass?.slug"
       @select="onSelect"
+      @select-external="onSelectExternal"
     />
     <div class="content-area">
       <div class="loader" v-if="loading">Loading…</div>
       <div class="error" v-else-if="error">{{ error }}</div>
-      <ClassDetail v-else :cls="activeClass" />
+      <ClassDetail v-else-if="activeClass" :cls="activeClass" />
+      <iframe v-else-if="externalUrl" :src="externalUrl" class="external-frame" />
     </div>
   </div>
 </template>
@@ -82,5 +91,12 @@ async function onSelect(slug) {
 }
 .error {
   color: #d32f2f;
+}
+.external-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  height: 100%;
+  background: #fff;
 }
 </style>
