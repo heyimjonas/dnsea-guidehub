@@ -10,29 +10,40 @@ const emit = defineEmits(['select', 'selectExternal'])
 
 const search = ref('')
 
-const filtered = computed(() => {
-  if (!search.value) return props.classes
-  const q = search.value.toLowerCase()
-  return props.classes.filter(c => c.name.toLowerCase().includes(q))
-})
-
 const catOpen = reactive({ 'News': true, 'Class Introduction': true })
 
-const categories = computed(() => [
-  {
-    name: 'News',
-    open: catOpen['News'],
-    items: [
-      { id: 'notice', name: 'Notice', url: 'https://sea.dragonnest.com/news/notice' },
-      { id: 'patchnotes', name: 'Patch Notes', url: 'https://patchnote.dragonnest.com/sea/' },
-    ],
-  },
-  {
-    name: 'Class Introduction',
-    open: catOpen['Class Introduction'],
-    items: filtered.value,
-  },
-])
+const categories = computed(() => {
+  const q = search.value.toLowerCase().trim()
+
+  const raw = [
+    {
+      name: 'News',
+      items: [
+        { id: 'notice', name: 'Notice', url: 'https://sea.dragonnest.com/news/notice' },
+        { id: 'patchnotes', name: 'Patch Notes', url: 'https://patchnote.dragonnest.com/sea/' },
+      ],
+    },
+    {
+      name: 'Class Introduction',
+      items: props.classes,
+    },
+  ]
+
+  if (!q) {
+    return raw.map(cat => ({
+      name: cat.name,
+      open: catOpen[cat.name],
+      items: cat.items,
+    }))
+  }
+  return raw
+    .map(cat => ({
+      name: cat.name,
+      open: catOpen[cat.name],
+      items: cat.items.filter(item => item.name.toLowerCase().includes(q)),
+    }))
+    .filter(cat => cat.items.length)
+})
 
 function toggleCategory(cat) {
   catOpen[cat.name] = !catOpen[cat.name]
