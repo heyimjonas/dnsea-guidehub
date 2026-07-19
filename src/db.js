@@ -32,13 +32,13 @@ export async function initDb() {
 
 export async function getClasses() {
   const db = await initDb()
-  const r = await db.exec('SELECT id, name, slug, class_image AS classImage FROM classes ORDER BY id')
+  const r = await db.exec('SELECT id, name, slug, class_image AS classImage, class_logo AS classLogo FROM classes ORDER BY id')
   return rows(r)
 }
 
 export async function getClassBySlug(slug) {
   const db = await initDb()
-  const r = await db.exec('SELECT id, name, slug, description, quick_profile AS quickProfile, difficulty, class_image AS classImage FROM classes WHERE slug = ?', [slug])
+  const r = await db.exec('SELECT id, name, slug, description, quick_profile AS quickProfile, difficulty, class_image AS classImage, class_logo AS classLogo FROM classes WHERE slug = ?', [slug])
   const list = rows(r)
   return list[0] || null
 }

@@ -23,7 +23,10 @@ function diffStars(n) {
   >
     <div class="scroll-area">
       <div class="content">
-      <h1 class="title">{{ cls.name }}</h1>
+      <h1 class="title">
+        <img v-if="cls.classLogo" :src="cls.classLogo" :alt="cls.name" class="class-logo" />
+        {{ cls.name }}
+      </h1>
 
       <div class="meta" v-if="cls.difficulty">
         <span class="label">Difficulty</span>
@@ -138,6 +141,15 @@ function diffStars(n) {
   margin: 0;
   color: #fff;
   text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 0 40px rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.class-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .meta {
   display: flex;
