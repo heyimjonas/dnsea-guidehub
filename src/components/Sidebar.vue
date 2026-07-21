@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 const props = defineProps({
   classes: { type: Array, default: () => [] },
+  equipment: { type: Array, default: () => [] },
   activeSlug: { type: String, default: null },
 })
 
@@ -10,7 +11,7 @@ const emit = defineEmits(['select', 'selectExternal'])
 
 const search = ref('')
 
-const catOpen = reactive({ 'News': true, 'Class Introduction': true })
+const catOpen = reactive({ 'News': true, 'Class Introduction': true, 'Equipment Introduction': false })
 
 const patchnoteTitle = ref('[2026] July Patchnote')
 
@@ -43,6 +44,10 @@ const categories = computed(() => {
     {
       name: 'Class Introduction',
       items: props.classes,
+    },
+    {
+      name: 'Equipment Introduction',
+      items: props.equipment.map(g => ({ id: g.id, name: g.name, slug: g.slug, isEquipGroup: true })),
     },
   ]
 

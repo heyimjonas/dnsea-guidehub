@@ -2,10 +2,15 @@
 import { ref, onMounted } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import ClassDetail from './components/ClassDetail.vue'
-import { getClasses, getClassWithSpecs } from './db.js'
+import EquipmentDetail from './components/EquipmentDetail.vue'
+import EquipmentGroupView from './components/EquipmentGroupView.vue'
+import { getClasses, getClassWithSpecs, getEquipment, getEquipmentItemBySlug, getEquipmentGroupBySlug } from './db.js'
 
 const classes = ref([])
+const equipment = ref([])
 const activeClass = ref(null)
+const activeEquip = ref(null)
+const activeGroup = ref(null)
 const externalUrl = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -14,6 +19,7 @@ const imgLoaded = ref(false)
 onMounted(async () => {
   try {
     classes.value = await getClasses()
+    equipment.value = await getEquipment()
     preloadImages()
     if (classes.value.length) {
       activeClass.value = await getClassWithSpecs(classes.value[0].slug)
@@ -38,8 +44,21 @@ async function onSelect(slug) {
   externalUrl.value = null
   loading.value = true
   imgLoaded.value = false
+  activeClass.value = null
+  activeEquip.value = null
+  activeGroup.value = null
   try {
-    activeClass.value = await getClassWithSpecs(slug)
+    const group = await getEquipmentGroupBySlug(slug)
+    if (group) {
+      activeGroup.value = group
+    } else {
+      const equipItem = await getEquipmentItemBySlug(slug)
+      if (equipItem) {
+        activeEquip.value = equipItem
+      } else {
+        activeClass.value = await getClassWithSpecs(slug)
+      }
+    }
   } catch (e) {
     error.value = e.message
   } finally {
@@ -57,14 +76,17 @@ function onSelectExternal(url) {
   <div class="layout">
     <Sidebar
       :classes="classes"
-      :active-slug="activeClass?.slug"
+      :equipment="equipment"
+      :active-slug="activeClass?.slug || activeEquip?.slug || activeGroup?.slug"
       @select="onSelect"
       @select-external="onSelectExternal"
     />
     <div class="content-area">
       <div class="loader" v-if="loading">Loading…</div>
       <div class="error" v-else-if="error">{{ error }}</div>
+      <EquipmentGroupView v-else-if="activeGroup" :group="activeGroup" />
       <ClassDetail v-else-if="activeClass" :cls="activeClass" />
+      <EquipmentDetail v-else-if="activeEquip" :item="activeEquip" />
       <iframe v-else-if="externalUrl" :src="externalUrl" class="external-frame" />
     </div>
   </div>

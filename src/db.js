@@ -72,3 +72,59 @@ export async function getClassWithSpecs(slug) {
   cls.firstSpecs = firstSpecs
   return cls
 }
+
+export async function getEquipment() {
+  const db = await initDb()
+  const groups = rows(await db.exec(
+    'SELECT id, name, slug FROM equipment_groups ORDER BY sort_order'
+  ))
+  const series = rows(await db.exec(
+    'SELECT id, group_id, name, slug, subtitle FROM equipment_series ORDER BY sort_order'
+  ))
+  const items = rows(await db.exec(
+    'SELECT id, series_id, group_id, name, slug, description, item_image, how_to_obtain FROM equipment_items ORDER BY sort_order'
+  ))
+  return groups.map(g => ({
+    ...g,
+    series: series
+      .filter(s => s.group_id === g.id)
+      .map(s => ({
+        ...s,
+        items: items.filter(i => i.series_id === s.id)
+      })),
+    directItems: items.filter(i => i.group_id === g.id && i.series_id === null)
+  }))
+}
+
+export async function getEquipmentItemBySlug(slug) {
+  const db = await initDb()
+  const r = await db.exec(
+    'SELECT id, series_id, group_id, name, slug, description, item_image, how_to_obtain FROM equipment_items WHERE slug = ?',
+    [slug]
+  )
+  const list = rows(r)
+  return list[0] || null
+}
+
+export async function getEquipmentGroupBySlug(slug) {
+  const db = await initDb()
+  const grp = rows(await db.exec(
+    'SELECT id, name, slug FROM equipment_groups WHERE slug = ?', [slug]
+  ))
+  if (!grp.length) return null
+  const g = grp[0]
+  const series = rows(await db.exec(
+    'SELECT id, group_id, name, slug, subtitle FROM equipment_series WHERE group_id = ? ORDER BY sort_order',
+    [g.id]
+  ))
+  const items = rows(await db.exec(
+    'SELECT id, series_id, group_id, name, slug, description, item_image, how_to_obtain FROM equipment_items WHERE group_id = ? ORDER BY sort_order',
+    [g.id]
+  ))
+  g.series = series.map(s => ({
+    ...s,
+    items: items.filter(i => i.series_id === s.id)
+  }))
+  g.directItems = items.filter(i => i.series_id === null)
+  return g
+}

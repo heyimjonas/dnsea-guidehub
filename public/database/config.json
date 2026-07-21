@@ -1,8 +1,8 @@
 {
   "serverMode": "chunked",
   "requestChunkSize": 4096,
-  "databaseLengthBytes": 53248,
-  "serverChunkSize": 53248,
+  "databaseLengthBytes": 65536,
+  "serverChunkSize": 65536,
   "urlPrefix": "dnsea_guidehub.db.",
   "suffixLength": 3
 }
